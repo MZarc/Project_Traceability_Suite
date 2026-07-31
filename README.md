@@ -33,27 +33,35 @@
 
 ## 🛠️ Architecture & Tech Stack
 
-```mermaid
-flowchart TD
-    subgraph S1 ["Desktop Shell (Electron Main)"]
-        A["Electron 30+ Main Process"] --> B["System Tray & IPC Bridge"]
-        A --> C["Native Window Manager"]
-    end
-
-    subgraph S2 ["User Interface (Client)"]
-        D["React 18 + TypeScript"] --> E["Vite Dev & Build Pipeline"]
-        D --> F["Tailwind CSS v4 + Lucide Icons"]
-        D --> G["TanStack Table v8 Excel Grid"]
-    end
-
-    subgraph S3 ["Backend API Engine"]
-        H["Node.js + Express REST API"] --> I["better-sqlite3 Engine"]
-        H --> J["ExcelJS Import/Export Parser"]
-        I --> K[("SQLite Local DB in %AppData%")]
-    end
-
-    C <-->|"Preload IPC"| D
-    D <-->|"HTTP / REST"| H
+```text
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                      DESKTOP SHELL (Electron Main)                     │
+ │  ┌─────────────────────────┐         ┌──────────────────────────────┐  │
+ │  │ Electron 30+ Process   │ ───────► │ System Tray & IPC Bridge    │  │
+ │  └────────────┬────────────┘         └──────────────────────────────┘  │
+ └───────────────┼────────────────────────────────────────────────────────┘
+                 │ (Secure Preload IPC Bridge)
+                 ▼
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                      USER INTERFACE (React Client)                     │
+ │  ┌─────────────────────────┐   ┌──────────────────┐   ┌─────────────┐  │
+ │  │ React 18 + TypeScript   │   │ Tailwind CSS v4  │   │ TanStack    │  │
+ │  │ (Vite Build Pipeline)   │   │ + Lucide Icons   │   │ Table Grid  │  │
+ │  └────────────┬────────────┘   └──────────────────┘   └─────────────┘  │
+ └───────────────┼────────────────────────────────────────────────────────┘
+                 │ (Local Express HTTP REST API)
+                 ▼
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                      BACKEND API & DATABASE ENGINE                     │
+ │  ┌─────────────────────────┐         ┌──────────────────────────────┐  │
+ │  │ Node.js + Express API   │ ───────► │ ExcelJS Synchronization      │  │
+ │  └────────────┬────────────┘         └──────────────────────────────┘  │
+ │               │                                                        │
+ │               ▼                                                        │
+ │  ┌──────────────────────────────────────────────────────────────────┐  │
+ │  │ better-sqlite3 Engine ──► Local SQLite Database (%AppData%)     │  │
+ │  └──────────────────────────────────────────────────────────────────┘  │
+ └────────────────────────────────────────────────────────────────────────┘
 ```
 
 | Layer | Technologies |

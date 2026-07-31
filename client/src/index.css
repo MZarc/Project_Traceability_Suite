@@ -1,0 +1,839 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/fonts/Montserrat-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/fonts/Montserrat-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@theme {
+  --color-brand: #10b981;
+  --color-brand-dim: #059669;
+  --color-ink: #0f172a;
+  --radius-xl: 1.5rem;
+}
+
+/* ─── Design Tokens ─────────────────────────────────────── */
+:root {
+  /* Chrome */
+  --chrome-bg:          #0c1526;
+  --chrome-surface:     #111c30;
+  --chrome-border:      rgba(255,255,255,0.07);
+  --chrome-text:        #e2e8f0;
+  --chrome-muted:       #64748b;
+
+  /* Brand Emerald */
+  --brand:              #10b981;
+  --brand-dim:          #059669;
+  --brand-glow:         rgba(16,185,129,0.18);
+
+  /* Sheet */
+  --sheet-bg:           #f8fafc;
+  --sheet-border:       #e2e8f0;
+
+  /* Status */
+  --status-done:        #065f46;
+  --status-done-bg:     #d1fae5;
+  --status-done-border: #a7f3d0;
+  --status-pending-bg:  #fef3c7;
+  --status-pending:     #92400e;
+  --status-hold-bg:     #fee2e2;
+  --status-hold:        #9f1239;
+  --status-active-bg:   #e0f2fe;
+  --status-active:      #075985;
+
+  color: #0f172a;
+  background: #f1f5f9;
+  font-family: "Montserrat", "Segoe UI", "Helvetica Neue", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body,
+#root,
+button,
+input,
+select,
+textarea {
+  text-transform: uppercase;
+}
+
+/* ─── Titlebar (Electron drag region) ──────────────────── */
+.custom-titlebar {
+  -webkit-app-region: drag;
+  user-select: none;
+  position: relative;
+}
+
+
+
+.custom-titlebar button,
+.custom-titlebar input,
+.custom-titlebar select,
+.custom-titlebar textarea,
+.custom-titlebar .no-drag {
+  -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 10;
+}
+
+body {
+  margin: 0;
+  min-width: 1280px;
+  font-family: "Montserrat", "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ─── Selection ─────────────────────────────────────────── */
+::selection {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+/* ─── Scrollbars ────────────────────────────────────────── */
+.phase-strip {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.35) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.3);
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* ─── Dialog Scroll Container ───────────────────────────── */
+.dialog-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+/* ─── Dialog Modal Backdrop ─────────────────────────────── */
+.dialog-backdrop {
+  will-change: opacity;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ─── Dialog Panel ──────────────────────────────────────── */
+.dialog-panel {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* ─── Stage Note Tooltip ───────────────────────────────── */
+.stage-note-tooltip {
+  pointer-events: none;
+  z-index: 15;
+}
+
+.stage-note-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 9px;
+  height: 9px;
+  background: #020617;
+  transform: translateX(-50%) rotate(45deg);
+  border-right: 1px solid rgba(148, 163, 184, 0.2);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.stage-note-tooltip-first-row::after {
+  display: none !important;
+}
+
+.stage-note-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 999px 999px 999px 999px;
+  background: #020617;
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  position: relative;
+}
+
+.stage-note-chip-add {
+  padding: 3px 8px 3px 7px;
+  font-size: 7px;
+  font-weight: 900;
+  min-height: 18px;
+}
+
+.stage-note-chip-note {
+  padding: 4px 9px 4px 10px;
+  min-height: 22px;
+}
+
+.stage-note-edit-btn {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+
+.sheet-scroll {
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.35) rgba(226, 232, 240, 0.3);
+}
+
+/* ─── Sheet Shell ───────────────────────────────────────── */
+.sheet-shell {
+  position: relative;
+}
+
+.sheet-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.06);
+}
+
+/* ─── Header Premium Chrome ─────────────────────────────── */
+.header-chrome {
+  background: linear-gradient(135deg, #0a1628 0%, #0c1a30 40%, #0d1e35 70%, #0a1628 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+  z-index: 50;
+}
+
+.header-chrome::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.6) 30%, rgba(16,185,129,0.8) 50%, rgba(16,185,129,0.6) 70%, transparent 100%);
+}
+
+/* ─── Stat Chip ─────────────────────────────────────────── */
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 52px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  transition: background 0.2s;
+}
+
+.stat-chip:hover {
+  background: rgba(255,255,255,0.07);
+}
+
+.stat-chip-label {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #64748b;
+  line-height: 1;
+}
+
+.stat-chip-value {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ─── Toolbar Control ───────────────────────────────────── */
+.ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  min-width: 0;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.ctrl-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.18);
+  color: #fff;
+}
+
+.ctrl-btn-accent {
+  background: var(--brand);
+  border-color: var(--brand-dim);
+  color: #fff;
+  font-weight: 800;
+}
+
+.ctrl-btn-accent:hover {
+  background: var(--brand-dim);
+  border-color: var(--brand-dim);
+  color: #fff;
+}
+
+.ctrl-btn-ghost {
+  background: transparent;
+  border-color: rgba(255,255,255,0.08);
+  color: #94a3b8;
+}
+
+.ctrl-btn-ghost:hover {
+  background: rgba(255,255,255,0.06);
+  color: #e2e8f0;
+}
+
+/* ─── Window Controls ───────────────────────────────────── */
+.win-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #94a3b8;
+  background: transparent;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.win-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.win-btn-close {
+  border-color: rgba(239,68,68,0.2);
+  color: #fca5a5;
+}
+
+.win-btn-close:hover {
+  background: rgba(239,68,68,0.2);
+  color: #fff;
+}
+
+/* ─── Search Input ──────────────────────────────────────── */
+.search-input {
+  height: 30px;
+  width: 160px;
+  padding: 0 10px 0 32px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.search-input::placeholder {
+  color: #475569;
+}
+
+.search-input:focus {
+  border-color: rgba(16,185,129,0.5);
+  background: rgba(16,185,129,0.04);
+}
+
+/* ─── Table Theming ─────────────────────────────────────── */
+.table-header-row th {
+  background: linear-gradient(180deg, #111c30 0%, #0d1826 100%);
+  color: #94a3b8;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.table-stage-header {
+  color: #34d399 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+.data-row td {
+  transition: background-color 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.data-row:hover td {
+  background-color: #f0fdf9 !important;
+}
+
+.data-row.row-selected td {
+  background-color: #ecfdf5 !important;
+}
+
+/* ─── Badge System ──────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.badge-done {
+  background: var(--status-done-bg);
+  color: var(--status-done);
+  border-color: var(--status-done-border);
+}
+
+.badge-pending {
+  background: var(--status-pending-bg);
+  color: var(--status-pending);
+  border-color: #fde68a;
+}
+
+.badge-hold {
+  background: var(--status-hold-bg);
+  color: var(--status-hold);
+  border-color: #fecaca;
+}
+
+.badge-active {
+  background: var(--status-active-bg);
+  color: var(--status-active);
+  border-color: #bae6fd;
+}
+
+.badge-na {
+  background: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  opacity: 0.7;
+}
+
+.badge-priority-high {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+
+.badge-priority-medium {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.badge-priority-low {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+/* ─── Date Pill ─────────────────────────────────────────── */
+.date-pill {
+  display: inline-flex;
+  min-width: 92px;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+}
+
+.date-pill-due-ok    { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.date-pill-due-warn  { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.date-pill-due-late  { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+.date-pill-comp-ok   { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.date-pill-comp-late { background: #fff1f2; color: #be123c; border-color: #fecdd3; font-weight: 800; }
+.date-pill-info      { background: #f0f9ff; color: #0284c7; border-color: #bae6fd; }
+
+.date-pill-violet {
+  background: #f5f3ff !important;
+  color: #6d28d9 !important;
+  border-color: #ddd6fe !important;
+}
+
+.date-pill-pink {
+  background: #fdf2f8 !important;
+  color: #be185d !important;
+  border-color: #fbcfe8 !important;
+}
+
+.date-pill-blue {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+.qty-pill-emerald {
+  display: inline-flex;
+  min-width: 56px;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.qty-pill-amber {
+  display: inline-flex;
+  min-width: 56px;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.qty-pill-rose {
+  display: inline-flex;
+  min-width: 56px;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
+/* Stage Separator solid vertical line overlays */
+.stage-separator-cell {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+.stage-separator-cell.editing-stage-cell,
+td.editing-stage-cell {
+  z-index: 9999 !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+.stage-separator-cell::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  bottom: -1px;
+  width: 3px;
+  background: #94a3b8;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.stage-separator-header::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  bottom: -1px;
+  width: 3px;
+  background: #475569;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ─── Smooth Table Scroll Container (Prevents Jittering at End Bounds) ─── */
+.sheet-scroll {
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Sidebar Premium ───────────────────────────────────── */
+.sidebar-field-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  padding: 14px 16px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  position: relative;
+}
+
+.sidebar-field-card:hover {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16,185,129,0.06);
+}
+
+.sidebar-stage-card {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.sidebar-stage-card:hover {
+  border-color: #34d399;
+  box-shadow: 0 2px 14px rgba(16,185,129,0.08);
+}
+
+/* ─── Modal Premium ─────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(12px);
+}
+
+.modal-panel {
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 32px 100px rgba(15,23,42,0.3), 0 0 0 1px rgba(255,255,255,0.8) inset;
+}
+
+/* ─── Brand User Chip ───────────────────────────────────── */
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(16,185,129,0.3);
+  background: rgba(16,185,129,0.08);
+  color: #34d399;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+
+/* ─── Search Input auto-size ────────────────────────────── */
+.search-input {
+  min-width: 120px;
+}
+
+/* ─── Brand Divider ─────────────────────────────────────── */
+.brand-divider {
+  width: 1px;
+  height: 12px;
+  background: rgba(255,255,255,0.12);
+  display: inline-block;
+}
+
+/* ─── Todo Badge ────────────────────────────────────────── */
+.todo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #f43f5e;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+/* ─── Premium Dropdown Scrollbar ────────────────────────── */
+.custom-dropdown-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-dropdown-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-dropdown-scroll::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: 10px;
+}
+
+.custom-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.4);
+}
+
+/* ─── Premium Group Row ─────────────────────────────────── */
+.group-row td {
+  padding: 0;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.02);
+  position: relative;
+  z-index: 10;
+}
+
+.group-row div {
+  transition: all 0.2s ease;
+}
+
+.group-row:hover td {
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.group-row .brand-divider {
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, #e2e8f0, transparent);
+  margin: 0 12px;
+}
+
+/* ─── Premium Inputs ─────────────────────────────────────── */
+.ctrl-input {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.ctrl-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.sidebar-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.sidebar-input:focus {
+  border-color: #10b981;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+}
+
+.sidebar-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  outline: none;
+  resize: none;
+  transition: all 0.2s ease;
+}
+
+.sidebar-textarea:focus {
+  border-color: #10b981;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+}
+
+/* ─── Empty State ───────────────────────────────────────── */
+.empty-state {
+  padding: 96px 24px;
+  text-align: center;
+}
+
+/* ─── Motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 1279px) {
+  body {
+    min-width: 100%;
+  }
+}

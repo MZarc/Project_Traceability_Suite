@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs & Packaging
+dist/
+dist-exe/
+build/
+out/
+release/
+*.apk
+*.exe
+*.dmg
+*.deb
+
+# Database & Storage
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+backups/
+database/
+
+# Certificates, Keys & Secrets
+*.pfx
+*.pem
+*.crt
+*.key
+*.cer
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+build_log.txt
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.user
+
+# TypeScript
+*.tsbuildinfo

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(15, 118, 110, 0.5));
+            z-index: 2;
+            position: relative;
+        }
+
+        .spinner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 4px solid rgba(15, 118, 110, 0.1);
+            border-top: 4px solid #0f766e;
+            border-radius: 50%;
+            animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            z-index: 1;
+            box-shadow: 0 0 15px rgba(15, 118, 110, 0.2);
+        }
+
+        .title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .status {
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-top: 12px;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 2px;
+            background: rgba(100, 116, 139, 0.2);
+            border-radius: 4px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+            background: #0f766e;
+            box-shadow: 0 0 10px #2dd4bf;
+            animation: progressMove 2s infinite ease-in-out;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes progressMove {
+            0% { left: -30%; width: 30%; }
+            50% { left: 40%; width: 40%; }
+            100% { left: 100%; width: 30%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-wrapper">
+            <div class="spinner"></div>
+            <img src="icon.png" class="logo" alt="Logo">
+        </div>
+        <div class="title">Project Traceability System</div>
+        <div class="status">Initializing Core Engine...</div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+</body>
+</html>

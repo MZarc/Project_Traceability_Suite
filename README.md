@@ -34,26 +34,26 @@
 ## 🛠️ Architecture & Tech Stack
 
 ```mermaid
-graph TD
-    subgraph Desktop Shell (Electron Main)
-        A[Electron 30+ Main Process] --> B[System Tray & IPC Bridge]
-        A --> C[Native Window Manager]
+flowchart TD
+    subgraph S1 ["Desktop Shell (Electron Main)"]
+        A["Electron 30+ Main Process"] --> B["System Tray & IPC Bridge"]
+        A --> C["Native Window Manager"]
     end
 
-    subgraph User Interface (Client)
-        D[React 18 + TypeScript] --> E[Vite Dev & Build Pipeline]
-        D --> F[Tailwind CSS v4 + Lucide Icons]
-        D --> G[TanStack Table v8 Excel Grid]
+    subgraph S2 ["User Interface (Client)"]
+        D["React 18 + TypeScript"] --> E["Vite Dev & Build Pipeline"]
+        D --> F["Tailwind CSS v4 + Lucide Icons"]
+        D --> G["TanStack Table v8 Excel Grid"]
     end
 
-    subgraph Backend API Engine
-        H[Node.js + Express REST API] --> I[better-sqlite3 Engine]
-        H --> J[ExcelJS Import/Export Parser]
-        I --> K[(SQLite Local DB in %AppData%)]
+    subgraph S3 ["Backend API Engine"]
+        H["Node.js + Express REST API"] --> I["better-sqlite3 Engine"]
+        H --> J["ExcelJS Import/Export Parser"]
+        I --> K[("SQLite Local DB in %AppData%")]
     end
 
-    C <-->|Preload IPC| D
-    D <-->|HTTP / REST| H
+    C <-->|"Preload IPC"| D
+    D <-->|"HTTP / REST"| H
 ```
 
 | Layer | Technologies |

@@ -1,9 +1,10 @@
 <div align="center">
   <img src="client/public/favicon.png" width="128" height="128" alt="Project Traceability Suite Logo" />
   <h1>Project Traceability Suite</h1>
-  <p><strong>Enterprise-grade desktop traceability suite for real-time Excel synchronization, stage aging analytics, and industrial workflow monitoring.</strong></p>
+  <p><strong>Enterprise-grade desktop traceability suite engineered specifically for Electronics & PCBA Manufacturing companies — real-time Excel synchronization, stage aging analytics, and production line workflow monitoring.</strong></p>
 
   <p>
+    <a href="#-tech-stack"><img src="https://img.shields.io/badge/Domain-Electronics_%26_PCBA_Manufacturing-0052CC?style=for-the-badge&logo=microchip&logoColor=white" alt="Electronics & PCBA"></a>
     <a href="#-tech-stack"><img src="https://img.shields.io/badge/Electron-30%2B-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron"></a>
     <a href="#-tech-stack"><img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"></a>
     <a href="#-tech-stack"><img src="https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"></a>
@@ -17,17 +18,20 @@
 
 ## 📌 Overview
 
-**Project Traceability Suite** is a high-performance Windows 11 desktop application designed to solve complex industrial project tracking, stage bottleneck detection, and daily Excel report synchronization. Built on top of **Electron**, **React 18**, **Express**, and **SQLite**, it combines local-first database performance with interactive analytics dashboards and system tray desktop controls.
+**Project Traceability Suite** is a high-performance Windows 11 desktop application engineered specifically for **Electronics & PCBA (Printed Circuit Board Assembly) Manufacturing** plants. 
+
+Unlike generic industrial ERPs, this suite is purpose-built to solve the specialized operational challenges of electronics manufacturing services (EMS) and OEM assembly lines—tracking multi-stage PCB batch lifecycles (SMT Assembly, AOI/AXI Inspection, THT Insertion, ICT/FCT Functional Testing, and Box-Build), identifying line bottlenecks, and seamlessly synchronizing daily Excel floor reports into a local-first SQLite analytics engine.
 
 ---
 
-## ✨ Key Features
+## 🔌 Tailored for Electronics & PCBA Production
 
-- 📊 **Real-Time Stage Aging Analytics**: Track running vs. completed stage durations, flag bottleneck projects (>14 days in a single stage), and monitor target due date precision.
-- 📁 **High-Throughput Excel Synchronization**: Import, map, and export complex Excel project logs with high-performance async parsing powered by ExcelJS.
-- ⚡ **Local-First SQLite Engine**: Enterprise reliability with transactional integrity, fast offline database queries, and automatic background data persistence in `%AppData%`.
-- 🖥️ **Windows Desktop Native Integration**: Native frameless windowing, system tray minimizes, progress notifications, and background alert triggers.
-- 🎨 **Modern Fluent Light UI**: Engineered with dynamic glassmorphism, responsive grid resizers, stage progress timelines, and custom scrollbars.
+- 📟 **PCBA Stage-by-Stage Traceability**: Track job cards and batch numbers through SMT (Surface Mount Technology), Reflow Soldering, AOI/AXI, THT, ICT/FCT, Conformal Coating, and Final Quality Packaging.
+- 📊 **Real-Time Stage Aging Analytics**: Monitor active PCB batches in each assembly stage, auto-flag critical line bottlenecks (>14 days in any single process), and audit planned vs. actual target completion dates.
+- 📁 **High-Throughput Excel Synchronization**: Import, map, and export daily production logs and Excel work orders with high-performance async parsing powered by ExcelJS.
+- ⚡ **Local-First SQLite Engine**: Fast offline database queries, transactional integrity, and automatic background data persistence in `%AppData%` for shop-floor stability.
+- 🖥️ **Windows Desktop Native Integration**: Native frameless windowing, system tray minimizes, progress notifications, and background alert triggers for production managers.
+- 🎨 **Modern Fluent Light UI**: Engineered with dynamic glassmorphism, responsive grid resizers, stage progress timelines, and custom scrollbars tailored for factory monitors.
 
 ---
 

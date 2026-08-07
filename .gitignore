@@ -48,5 +48,9 @@ Thumbs.db
 *.suo
 *.user
 
+# AI & Agent Configs
+.agent/
+.gemini/
+
 # TypeScript
 *.tsbuildinfo

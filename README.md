@@ -6,8 +6,8 @@
 
 ### Real-time production traceability for **Electronics & PCBA manufacturing**
 
-Track every board from order sheet to dispatch — across an 11-stage shop-floor pipeline —
-with a local-first SQLite engine, Excel import/export, and a native Windows desktop shell.
+Track every **project / job** from order sheet to dispatch — across an 11-stage shop-floor
+pipeline — with a local-first SQLite engine, Excel import/export, and a native Windows shell.
 
 <br />
 
@@ -35,10 +35,13 @@ with a local-first SQLite engine, Excel import/export, and a native Windows desk
 
 **Project Traceability Suite** is a high-performance **Windows desktop application** purpose-built for **Electronics & PCBA (Printed Circuit Board Assembly)** manufacturing floors.
 
-Generic ERPs treat a build as a single status field. Real electronics manufacturing is a **multi-stage pipeline** — procurement, kitting, SMT, AOI, through-hole, QC, programming, testing, conformal coating, final goods and dispatch — where each station has its own start, due and completion dates, and where a single stalled stage silently delays the whole shipment.
+Generic ERPs treat a job as a single status field. Real electronics manufacturing is a **multi-stage pipeline** — procurement, kitting, SMT, AOI, through-hole, QC, programming, testing, conformal coating, final goods and dispatch — where each station has its own start, due and completion dates, and where a single stalled stage silently delays the whole shipment.
+
+The unit tracked is the **project / job** (a work order or manufacturing batch), not an individual board — so the dashboard reflects how the floor actually schedules, monitors and ships work.
 
 This suite was engineered around that reality:
 
+- **Project / job-centric.** One row per job, carrying its full 11-stage lifecycle, quantities and customer in a single record.
 - **Local-first.** A bundled Express + SQLite engine runs on the machine. No cloud, no internet dependency, no latency on the shop floor.
 - **Stage-aware.** Every project carries a full 11-stage timeline; the dashboard derives live status (Active / Completed / Overdue) from real stage dates.
 - **Excel-native.** Floor teams keep working in Excel — import and export work orders and daily logs without changing their habits.
@@ -50,13 +53,13 @@ This suite was engineered around that reality:
 
 ### 🏭 Production Traceability
 - **11-stage shop-floor pipeline** per project — procurement to dispatch, each with Status, Start, Due and Done tracking.
-- **Dispatch quantity control** — track shipped vs. remaining board quantities explicitly.
+- **Dispatch quantity control** — track shipped vs. remaining quantities for each job explicitly.
 - **Dynamic custom columns** — extend the grid with plant-specific fields without a schema migration.
 
 ### 📊 Live Analytics & Monitoring
 - **Stage aging analysis** — days spent in each stage, flagging bottlenecks and overdue stages.
 - **Live statistics dashboard** — active, completed and overdue counts, plus upcoming/past-due alerts.
-- **Per-project analytics modal** — a full timeline breakdown of where a build's time actually went.
+- **Per-project analytics modal** — a full timeline breakdown of where a job's time actually went.
 
 ### 🗂️ Business Data
 - **Customer database** — full contact records (multi-contact name, phone, email, designation), searchable and paginated.
@@ -79,58 +82,72 @@ This suite was engineered around that reality:
 
 ## 🔄 Shop-Floor Pipeline
 
-Every project flows through the same eleven stages. Each stage tracks **Status**, **Start date**, **Due date** and **Done date**; the final stage additionally tracks **Shipped Qty** and **Remaining Qty**.
+Every **project / job** flows through the same eleven stages, in order. Each stage records **Status**, **Start date**, **Due date** and **Done date**; **Dispatch** additionally records **Shipped Qty** and **Remaining Qty**.
 
-```text
-  ┌───────────────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-  │ Procurement /     │ → │ Kitting  │ → │   SMT    │ → │   AOI    │
-  │ Order Sheet       │   └──────────┘   └──────────┘   └──────────┘
-  └───────────────────┘                                        │
-                                                               ▼
-  ┌──────────┐   ┌──────────┐   ┌──────────────┐   ┌──────────┐
-  │    TH    │ → │    QC    │ → │ Programming  │ → │ Testing  │
-  └──────────┘   └──────────┘   └──────────────┘   └──────────┘
-       ▲
-       │
-  ┌──────────┐   ┌──────────┐   ┌──────────────────────────────┐
-  │ Coating  │ → │    FG    │ → │ Dispatch                     │
-  └──────────┘   └──────────┘   │ (Shipped Qty / Remaining Qty) │
-                                └──────────────────────────────┘
+```mermaid
+flowchart LR
+    S1["1 · Procurement<br/>Order Sheet"] --> S2["2 · Kitting"] --> S3["3 · SMT"] --> S4["4 · AOI"]
+    S4 --> S5["5 · TH"] --> S6["6 · QC"] --> S7["7 · Programming"] --> S8["8 · Testing"]
+    S8 --> S9["9 · Coating"] --> S10["10 · FG"] --> S11["11 · Dispatch<br/>+ Shipped / Remaining Qty"]
+
+    classDef stage fill:#e0f2fe,stroke:#0284c7,stroke-width:1.5px,color:#0c4a6e;
+    classDef last fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d;
+    class S1,S2,S3,S4,S5,S6,S7,S8,S9,S10 stage;
+    class S11 last;
 ```
 
-> Status is **derived automatically** from stage dates — never stored stale. A project that passes its dispatch due date before completion is flagged **Overdue** in real time.
+> Status is **derived automatically** from stage dates — never stored stale. A job that passes its dispatch due date before completion is flagged **Overdue** in real time.
 
 ---
 
 ## 🛠️ Architecture
 
-A three-tier local stack: a native desktop shell, a React renderer, and a bundled REST + SQLite engine — all communicating over localhost.
+A three-tier local stack: a native desktop shell, a React renderer, and a bundled REST + SQLite engine — communicating over localhost.
 
-```text
- ┌──────────────────────────────────────────────────────────────────────────┐
- │                        DESKTOP SHELL  (Electron Main)                    │
- │   Frameless window · Splash screen · System tray · Single-instance lock  │
- │   Background alert scheduler · Native notifications · IPC bridge         │
- └───────────────────────────────────┬──────────────────────────────────────┘
-                                     │  Secure preload IPC (contextBridge)
-                                     ▼
- ┌──────────────────────────────────────────────────────────────────────────┐
- │                        RENDERER  (React 19 + TypeScript)                 │
- │   Vite build · Tailwind CSS v4 · TanStack Table · Framer Motion          │
- │   Traceability grid · Analytics · Customers · To-Do · Changelog          │
- └───────────────────────────────────┬──────────────────────────────────────┘
-                                     │  axios HTTP  →  http://localhost:5000
-                                     ▼
- ┌──────────────────────────────────────────────────────────────────────────┐
- │                        BACKEND  (Node.js + Express 5)                    │
- │   REST API · ExcelJS import/export · node-cron daily backup              │
- │                              │                                           │
- │                              ▼                                           │
- │   better-sqlite3  ──►  Local SQLite database  (%AppData% / backend dir)  │
- └──────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Shell["🖥️ Desktop Shell — Electron Main"]
+        direction LR
+        W["Frameless window<br/>+ splash"]
+        Tray["System tray<br/>live counters"]
+        Lock["Single-instance lock"]
+        Alerts["Alert scheduler<br/>+ native toasts"]
+    end
+
+    subgraph Render["⚛️ Renderer — React 19 + TypeScript"]
+        direction LR
+        Grid["Traceability grid"]
+        Analytics["Analytics"]
+        Customers["Customers"]
+        Todo["To-Do"]
+    end
+
+    subgraph API["🔌 Backend — Node.js + Express 5"]
+        direction LR
+        Rest["REST API<br/>:5000"]
+        Excel["ExcelJS<br/>import / export"]
+        Cron["node-cron<br/>daily backup"]
+    end
+
+    DB[("🗄️ SQLite 3<br/>better-sqlite3")]
+
+    Shell -->|"preload IPC · contextBridge"| Render
+    Render -->|"axios HTTP · localhost:5000"| Rest
+    Rest --> DB
+    Excel --> DB
+    Cron --> DB
+
+    classDef shell fill:#ede9fe,stroke:#7c3aed,stroke-width:1.5px,color:#4c1d95;
+    classDef ui fill:#e0f2fe,stroke:#0284c7,stroke-width:1.5px,color:#0c4a6e;
+    classDef svc fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d;
+    classDef store fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f;
+    class W,Tray,Lock,Alerts shell;
+    class Grid,Analytics,Customers,Todo ui;
+    class Rest,Excel,Cron svc;
+    class DB store;
 ```
 
-The Electron main process **spawns the backend as a child process** and passes it a persistent `--base-dir`, so the database and backups always live next to the installed app data rather than inside the read-only bundle.
+The Electron main process **spawns the backend as a child process** and passes it a persistent `--base-dir`, so the database and backups always live in the writable app-data directory rather than inside the read-only bundle.
 
 ---
 
@@ -307,7 +324,7 @@ Contributions, issues and feature requests are welcome — open an [issue](https
 4. Push the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-Built and maintained by **Meet Mistry** ([@MZarc](https://github.com/MZarc)).
+Built and maintained by **[@MZarc](https://github.com/MZarc)**.
 
 ---
 

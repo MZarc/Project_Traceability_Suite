@@ -60,9 +60,9 @@ function getDaysDifference(start: Date, end: Date): number {
 }
 
 export default function ProjectAnalyticsModal({ project, onClose, stageStructure }: ProjectAnalyticsModalProps) {
-  if (!project) return null;
-
   const stageAnalytics = useMemo(() => {
+    if (!project) return null;
+
     let completedCount = 0;
     let runningCount = 0;
     let pendingCount = 0;
@@ -151,7 +151,7 @@ export default function ProjectAnalyticsModal({ project, onClose, stageStructure
         durationDays,
         isOverdue,
         delayDays,
-        note: String(project.stages[`${stg.name}_note`] || '')
+        note: String(project.stages[`${stg.name}_remarks`] || project.stages[`${stg.name}_note`] || '')
       };
     });
 
@@ -192,11 +192,14 @@ export default function ProjectAnalyticsModal({ project, onClose, stageStructure
   }, [project, stageStructure]);
 
   const totalProjectDays = useMemo(() => {
+    if (!stageAnalytics) return 14;
     const start = stageAnalytics.earliestDate;
     const end = stageAnalytics.latestDate;
     const diff = getDaysDifference(start, end);
     return Math.max(14, diff + 4);
   }, [stageAnalytics]);
+
+  if (!project || !stageAnalytics) return null;
 
   return (
     <AnimatePresence>

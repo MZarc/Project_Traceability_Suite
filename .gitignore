@@ -51,6 +51,7 @@ Thumbs.db
 # AI & Agent Configs
 .agent/
 .gemini/
+.trail/
 
 # TypeScript
 *.tsbuildinfo

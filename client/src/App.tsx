@@ -357,7 +357,7 @@ const getStatus = (project: ProjectApi, stages: Stages, allDueAlerts?: DueAlert[
   }
 
   // Fallback for initial load if alerts aren't ready
-  const dispatchDue = normalizeText(stages['Dispatch/FG_Due date']);
+  const dispatchDue = normalizeText(stages['Dispatch_Due date']) || normalizeText(stages['Dispatch/FG_Due date']);
   const parsedDue = parseFlexibleDate(dispatchDue);
   if (parsedDue && parsedDue.getTime() < Date.now()) return 'Overdue';
 
@@ -701,12 +701,14 @@ export default function App() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isDeveloperModalOpen, setIsDeveloperModalOpen] = useState(false);
   const [alertSnoozeHours, setAlertSnoozeHours] = useState<number>(() => {
-    const s = localStorage.getItem('traceability-alert-snooze-hours');
-    return s !== null ? Number(s) : 2;
+    const raw = localStorage.getItem('traceability-alert-snooze-hours');
+    const s = raw === null ? NaN : Number(raw);
+    return Number.isFinite(s) ? s : 2;
   });
   const [alertSnoozeMinutes, setAlertSnoozeMinutes] = useState<number>(() => {
-    const s = localStorage.getItem('traceability-alert-snooze-minutes');
-    return s !== null ? Number(s) : 0;
+    const raw = localStorage.getItem('traceability-alert-snooze-minutes');
+    const s = raw === null ? NaN : Number(raw);
+    return Number.isFinite(s) ? s : 0;
   });
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -797,8 +799,8 @@ export default function App() {
 
   // Requirement 2: Permanent Default Zoom vs Temporary Session Zoom
   const [permanentDefaultZoom, setPermanentDefaultZoom] = useState<number>(() => {
-    const saved = localStorage.getItem('pms-permanent-default-zoom');
-    return saved ? Number(saved) : 1.0;
+    const saved = Number(localStorage.getItem('pms-permanent-default-zoom'));
+    return Number.isFinite(saved) && saved > 0 ? saved : 1.0;
   });
   const [zoomLevel, setZoomLevel] = useState<number>(permanentDefaultZoom);
 
@@ -846,8 +848,8 @@ export default function App() {
             ...project,
             sr_no: normalizeSrNo(project.sr_no),
             priority: project.priority || 'Medium',
-            due_date: normalizeText(project.due_date) || normalizeText(stages['Dispatch/FG_Due date']),
-            completion_date: normalizeText(project.completion_date) || normalizeText(stages['Dispatch/FG_Date completion']),
+            due_date: normalizeText(project.due_date) || normalizeText(stages['Dispatch_Due date']) || normalizeText(stages['Dispatch/FG_Due date']),
+            completion_date: normalizeText(project.completion_date) || normalizeText(stages['Dispatch_Done date']) || normalizeText(stages['Dispatch/FG_Date completion']),
             stages,
             status: 'Active', // Temp status, will be updated by useEffect
           };
@@ -873,7 +875,7 @@ export default function App() {
     loadTodos();
 
     // Request notification permission
-    if (Notification.permission === 'default') {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission();
     }
 
@@ -889,8 +891,10 @@ export default function App() {
   useEffect(() => {
     const checkAlerts = () => {
       const now = new Date();
-      const nowDateStr = now.toISOString().split('T')[0];
-      const nowTimeStr = now.toTimeString().slice(0, 5); // HH:mm
+      // Use the user's local calendar date (toISOString() would shift by TZ offset
+      // and desync from the local date stored in todo.due_date).
+      const nowDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const nowTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`; // HH:mm
 
       todos.forEach(todo => {
         if (!todo.completed && todo.due_date === nowDateStr && todo.due_time === nowTimeStr) {
@@ -1237,14 +1241,25 @@ export default function App() {
       completed: stats.completed,
       overdue: stats.overdue,
     });
+  }, [stats.active, stats.completed, stats.overdue]);
 
-    // Update project statuses based on current alerts
-    setProjects(prev => prev.map(p => {
-      const newStatus = getStatus(p, p.stages, allDueAlerts);
-      if (newStatus !== p.status) return { ...p, status: newStatus };
-      return p;
-    }));
-  }, [stats.active, stats.completed, stats.overdue, allDueAlerts]);
+  // Re-derive project statuses whenever the alert set changes. Bail out (return
+  // the previous array reference) when nothing actually changed so this effect
+  // cannot create an update loop with the `allDueAlerts` memo below it.
+  useEffect(() => {
+    setProjects(prev => {
+      let changed = false;
+      const next = prev.map(p => {
+        const newStatus = getStatus(p, p.stages, allDueAlerts);
+        if (newStatus !== p.status) {
+          changed = true;
+          return { ...p, status: newStatus };
+        }
+        return p;
+      });
+      return changed ? next : prev;
+    });
+  }, [allDueAlerts]);
 
   const getProjectById = (id: number | string | undefined | null) => {
     if (id === undefined || id === null) return null;
@@ -1614,7 +1629,7 @@ export default function App() {
     const activeSnoozes = Object.fromEntries(Object.entries(alertSnoozes).filter(([, until]) => until > now));
     if (Object.keys(activeSnoozes).length !== Object.keys(alertSnoozes).length) {
       setAlertSnoozes(activeSnoozes);
-      localStorage.setItem('traceability-due-alert-snoozes', JSON.stringify(activeSnoozes));
+      sessionStorage.setItem('traceability-due-alert-snoozes', JSON.stringify(activeSnoozes));
     }
 
     if (!visibleDueAlerts.length) {
@@ -2003,11 +2018,16 @@ export default function App() {
         'Dispatch_Remaining Qty': remainingQty
       }
     };
-    if (editingId) await axios.put(`${API_URL}/projects/${editingId}`, payload);
-    else await axios.post(`${API_URL}/projects`, payload);
-    setIsProjectModalOpen(false);
-    setEditingId(null);
-    await loadData();
+    try {
+      if (editingId) await axios.put(`${API_URL}/projects/${editingId}`, payload);
+      else await axios.post(`${API_URL}/projects`, payload);
+      setIsProjectModalOpen(false);
+      setEditingId(null);
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      setDialogState(createAlertDialog('Save Failed', 'Could not save this project record.'));
+    }
   };
 
   const handleDialogConfirm = async () => {
@@ -2044,7 +2064,7 @@ export default function App() {
       delete nextSnoozes[key];
     });
     setAlertSnoozes(nextSnoozes);
-    localStorage.setItem('traceability-due-alert-snoozes', JSON.stringify(nextSnoozes));
+    sessionStorage.setItem('traceability-due-alert-snoozes', JSON.stringify(nextSnoozes));
     if (alertSnoozeTimerRef.current) window.clearTimeout(alertSnoozeTimerRef.current);
   };
 
@@ -2099,7 +2119,7 @@ export default function App() {
               className="no-drag flex flex-col justify-end items-start leading-none gap-0.5 text-left group cursor-pointer hover:opacity-80 transition-opacity"
               title="Click to view Developer Credits"
             >
-              <span className="text-[7px] font-black tracking-[0.1em] text-sky-300/80 italic uppercase mb-[1px]">v1.3</span>
+              <span className="text-[7px] font-black tracking-[0.1em] text-sky-300/80 italic uppercase mb-[1px]">v1.4</span>
               <span className="text-[7px] font-black text-sky-400/80 tracking-widest uppercase italic">Developed by</span>
               <span className="text-[9px] font-black text-emerald-400 tracking-wider uppercase group-hover:text-emerald-300 group-hover:underline">MEET MISTRY</span>
             </button>
@@ -4131,7 +4151,7 @@ export default function App() {
                   <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3.5 text-left space-y-1.5">
                     <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
                       <span>Product Suite</span>
-                      <span className="text-emerald-400 font-extrabold">v1.3 Enterprise Edition</span>
+                      <span className="text-emerald-400 font-extrabold">v1.4 Enterprise Edition</span>
                     </div>
                     <p className="text-[11px] leading-relaxed text-slate-300 font-medium">
                       Designed and engineered with high-throughput Excel synchronization, real-time stage traceability analytics, and desktop-grade workflow controls.

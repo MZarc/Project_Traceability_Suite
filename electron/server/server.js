@@ -13,36 +13,28 @@ const app = express();
 const port = 5000;
 
 app.use(cors());
+
+// --- Persistent Data Path Logic ---
+const args = process.argv.slice(2);
+const baseDirArg = args.find(arg => arg.startsWith('--base-dir='));
+const dataBaseDir = baseDirArg ? baseDirArg.split('=')[1] : __dirname;
+const backupDir = path.join(dataBaseDir, 'backups');
+
+console.log(`[SYSTEM] Data Directory: ${dataBaseDir}`);
 app.use(bodyParser.json({ limit: '50mb' }));
 
-// Determine writable data path
-const args = process.argv.slice(2);
-const baseDirArg = args.find(a => a.startsWith('--base-dir='));
-const baseDir = baseDirArg ? baseDirArg.split('=')[1] : __dirname;
-
-const dbPath = path.join(baseDir, 'database.sqlite');
-const backupDir = path.join(baseDir, 'backups');
-
-const db = new Database(dbPath);
-
-try {
-  db.pragma('journal_mode = WAL');
-  db.pragma('synchronous = NORMAL');
-  db.pragma('temp_store = MEMORY');
-  db.pragma('cache_size = -64000');
-} catch (e) {
-  console.log('[DB PRAGMA] Fallback applied:', e.message);
-}
-
 const STAGE_STRUCTURE = [
-  { name: 'Sheet metal', sub: ['status', 'Due date', 'Date completion'] },
-  { name: 'Plating / powder coating', sub: ['status', 'Due date', 'Date completion'] },
-  { name: 'Knurling / Pressing / Gasket', sub: ['status', 'Due date', 'Date completion'] },
-  { name: 'Kitting', sub: ['status', 'Due date', 'Date completion'] },
-  { name: 'Procurement / ordersheet', sub: ['status', 'Due date', 'Date completion'] },
-  { name: 'SMT', sub: ['status', 'Plan given date', 'Date completion'] },
-  { name: 'TH', sub: ['status', 'Plan given date', 'Date completion'] },
-  { name: 'Dispatch / FG', sub: ['status', 'Due date', 'Date completion'] },
+  { name: 'Procurement / ordersheet', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'Kitting', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'SMT', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'AOI', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'TH', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'QC', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'Programming', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'TESTING', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'COATING', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'FG', sub: ['status', 'Start date', 'Due date', 'Done date'] },
+  { name: 'Dispatch', sub: ['status', 'Start date', 'Due date', 'Done date', 'Shipped Qty', 'Remaining Qty'] },
 ];
 
 const STAGE_STRUCTURE_NORMALIZED = STAGE_STRUCTURE.map(s => ({
@@ -70,20 +62,26 @@ async function runAutomatedBackup() {
       { header: 'CUSTOMER', width: 25 },
       { header: 'QTY', width: 10 },
       { header: 'PRIORITY', width: 15 },
+      { header: 'REMARKS', width: 40 },
       { header: 'DATA RECEIVED', width: 18 },
       { header: 'DATA SHARED', width: 18 },
     ];
+    
     STAGE_STRUCTURE_NORMALIZED.forEach(stage => {
-      mainCols.push({ header: stage.display, width: 15 }, { header: stage.display, width: 15 }, { header: stage.display, width: 15 });
+      stage.sub.forEach(() => {
+        mainCols.push({ header: stage.display, width: 15 });
+      });
     });
-    mainCols.push({ header: 'REMARKS', width: 40 });
 
     const header1 = worksheet.addRow(mainCols.map(c => c.header));
-    const subHeader = [...Array(7).fill(null)];
+    const subHeader = [...Array(8).fill(null)];
     STAGE_STRUCTURE_NORMALIZED.forEach(stage => {
-      subHeader.push('STATUS', stage.name === 'SMT' || stage.name === 'TH' ? 'PLAN GIVEN DATE' : 'DUE DATE', 'COMPLETION DATE');
+      stage.sub.forEach(sub => {
+        let subLabel = sub.toUpperCase();
+        if (sub === 'Date completion' || sub === 'Done date') subLabel = 'DONE DATE';
+        subHeader.push(subLabel);
+      });
     });
-    subHeader.push(null);
     const header2 = worksheet.addRow(subHeader);
 
     // 2. Head Styling & Merges
@@ -95,13 +93,14 @@ async function runAutomatedBackup() {
         cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
       });
     });
-    for(let i=1; i<=7; i++) worksheet.mergeCells(1, i, 2, i);
-    let stCol = 8;
-    STAGE_STRUCTURE_NORMALIZED.forEach(() => {
-      worksheet.mergeCells(1, stCol, 1, stCol+2);
-      stCol += 3;
+    
+    for(let i=1; i<=8; i++) worksheet.mergeCells(1, i, 2, i);
+    
+    let stCol = 9;
+    STAGE_STRUCTURE_NORMALIZED.forEach(stage => {
+      worksheet.mergeCells(1, stCol, 1, stCol + stage.sub.length - 1);
+      stCol += stage.sub.length;
     });
-    worksheet.mergeCells(1, stCol, 2, stCol);
 
     // 3. Data Rows
     projects.forEach(p => {
@@ -112,24 +111,34 @@ async function runAutomatedBackup() {
         String(p.customer || '').toUpperCase(),
         p.qty,
         String(p.priority || 'MEDIUM').toUpperCase(),
+        String(p.remarks || '').toUpperCase(),
         String(p.due_date || '').toUpperCase(),
         String(p.completion_date || '').toUpperCase()
       ];
+      
       STAGE_STRUCTURE_NORMALIZED.forEach(s => {
-        const plannedKey = s.name === 'SMT' || s.name === 'TH' ? `${s.name}_Plan given date` : `${s.name}_Due date`;
-        rowData.push(
-          String(stages[`${s.name}_status`] || 'PENDING').toUpperCase(),
-          String(stages[plannedKey] || '').toUpperCase(),
-          String(stages[`${s.name}_Date completion`] || '').toUpperCase()
-        );
+        s.sub.forEach(sub => {
+          const fieldKey = `${s.name}_${sub}`;
+          // Get value, with fallback for backward compatibility
+          let val = stages[fieldKey];
+          if (val === undefined || val === null) {
+            if (sub === 'Done date') val = stages[`${s.name}_Date completion`];
+            else if (sub === 'Due date' && (s.name === 'SMT' || s.name === 'TH')) val = stages[`${s.name}_Plan given date`];
+          }
+          if (sub === 'status' && !val) val = 'PENDING';
+          rowData.push(String(val || '').toUpperCase());
+        });
       });
-      rowData.push(String(p.remarks || '').toUpperCase());
+      
       const r = worksheet.addRow(rowData);
       r.eachCell((cell, colNum) => {
         cell.alignment = { vertical: 'middle', horizontal: 'center' };
         cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-        if (colNum > 7 && (colNum-8) % 3 === 0) {
-          const s = String(cell.value).toLowerCase();
+        if (colNum === 6) {
+          cell.font = { color: { argb: 'FFE11D48' }, bold: true, size: 10 };
+        }
+        if (colNum > 8 && subHeader[colNum - 1] === 'STATUS') {
+          const s = String(cell.value || '').toLowerCase();
           let c = 'FFF1F5F9';
           if (s.includes('done') || s.includes('compl')) c = 'FFD1FAE5';
           else if (s.includes('hold')) c = 'FFFEE2E2';
@@ -167,9 +176,30 @@ cron.schedule('0 0 * * *', runAutomatedBackup);
 // System Boot Backup
 runAutomatedBackup();
 
-// Schedualed Backup every day at midnight
+// --- Intelligent Auto-Sync Backup (Debounced) ---
+let backupDebounceTimer = null;
+function requestBackup() {
+  if (backupDebounceTimer) clearTimeout(backupDebounceTimer);
+  backupDebounceTimer = setTimeout(() => {
+    runAutomatedBackup();
+    backupDebounceTimer = null;
+  }, 30000); // 30 seconds of inactivity
+}
 
-// Create tables
+// Database initialization & high-performance PRAGMA setup
+const dbPath = path.join(dataBaseDir, 'database.sqlite');
+const db = new Database(dbPath);
+
+try {
+  db.pragma('journal_mode = WAL');
+  db.pragma('synchronous = NORMAL');
+  db.pragma('temp_store = MEMORY');
+  db.pragma('cache_size = -64000');
+} catch (e) {
+  console.log('[DB PRAGMA] Fallback applied:', e.message);
+}
+
+// Create tables & indexes
 db.exec(`
   CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -315,6 +345,7 @@ app.post('/api/todos', (req, res) => {
   try {
     const stmt = db.prepare('INSERT INTO todos (task, priority, category, due_date, due_time) VALUES (?, ?, ?, ?, ?)');
     const info = stmt.run(task, priority || 'Medium', category || 'Production', due_date || '', due_time || '');
+    requestBackup();
     res.json({ id: info.lastInsertRowid });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -327,6 +358,7 @@ app.put('/api/todos/:id', (req, res) => {
   try {
     const stmt = db.prepare('UPDATE todos SET task = ?, priority = ?, category = ?, due_date = ?, due_time = ?, completed = ? WHERE id = ?');
     stmt.run(task, priority, category, due_date, due_time, completed ? 1 : 0, id);
+    requestBackup();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -336,6 +368,7 @@ app.put('/api/todos/:id', (req, res) => {
 app.delete('/api/todos/:id', (req, res) => {
   try {
     db.prepare('DELETE FROM todos WHERE id = ?').run(req.params.id);
+    requestBackup();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -365,11 +398,17 @@ app.get('/api/projects', (req, res) => {
 app.post('/api/projects', (req, res) => {
   const { sr_no, customer, project_name, qty, priority, due_date, completion_date, remarks, stages } = req.body;
   try {
+    const stagesParsed = stages || {};
+    const totalQty = parseInt(qty) || 0;
+    const shippedQty = parseFloat(stagesParsed['Dispatch_Shipped Qty'] || '0') || 0;
+    stagesParsed['Dispatch_Remaining Qty'] = String(Math.max(0, totalQty - shippedQty));
+
     const stmt = db.prepare(`
       INSERT INTO projects (sr_no, customer, project_name, qty, priority, due_date, completion_date, remarks, stages)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = stmt.run(sr_no, customer, project_name, qty, priority, due_date, completion_date, remarks, JSON.stringify(stages || {}));
+    const info = stmt.run(sr_no, customer, project_name, qty, priority, due_date, completion_date, remarks, JSON.stringify(stagesParsed));
+    requestBackup();
     res.json({ id: info.lastInsertRowid });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -380,12 +419,18 @@ app.put('/api/projects/:id', (req, res) => {
   const { id } = req.params;
   const { sr_no, customer, project_name, qty, priority, due_date, completion_date, remarks, stages } = req.body;
   try {
+    const stagesParsed = stages || {};
+    const totalQty = parseInt(qty) || 0;
+    const shippedQty = parseFloat(stagesParsed['Dispatch_Shipped Qty'] || '0') || 0;
+    stagesParsed['Dispatch_Remaining Qty'] = String(Math.max(0, totalQty - shippedQty));
+
     const stmt = db.prepare(`
       UPDATE projects 
       SET sr_no = ?, customer = ?, project_name = ?, qty = ?, priority = ?, due_date = ?, completion_date = ?, remarks = ?, stages = ?
       WHERE id = ?
     `);
-    stmt.run(sr_no, customer, project_name, qty, priority, due_date, completion_date, remarks, JSON.stringify(stages || {}), id);
+    stmt.run(sr_no, customer, project_name, qty, priority, due_date, completion_date, remarks, JSON.stringify(stagesParsed), id);
+    requestBackup();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -395,6 +440,7 @@ app.put('/api/projects/:id', (req, res) => {
 app.delete('/api/projects/:id', (req, res) => {
   try {
     db.prepare('DELETE FROM projects WHERE id = ?').run(req.params.id);
+    requestBackup();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -404,6 +450,7 @@ app.delete('/api/projects/:id', (req, res) => {
 app.delete('/api/projects-clear', (req, res) => {
   try {
     db.prepare('DELETE FROM projects').run();
+    requestBackup();
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -471,6 +518,7 @@ app.post('/api/import-excel', (req, res) => {
     });
 
     transaction(projects);
+    requestBackup();
     res.json({ success: true, count: projects.length });
   } catch (err) {
     res.status(500).json({ error: err.message });

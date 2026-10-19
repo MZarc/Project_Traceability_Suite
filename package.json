@@ -1,8 +1,8 @@
 {
   "name": "project_traceability_system",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Professional industrial project traceability and dashboard system for real-time production monitoring.",
-  "main": "index.js",
+  "main": "electron/main.js",
   "workspaces": [
     "client",
     "backend",
@@ -12,7 +12,7 @@
     "dev": "concurrently \"npm run dev -w client\" \"npm run start -w backend\" \"npm run dev -w electron\"",
     "rebuild": "npm rebuild better-sqlite3",
     "build": "npm run build -w client",
-    "package": "npm run build -w client && powershell -Command \"if (Test-Path electron/dist) { Remove-Item -Recurse -Force electron/dist }; New-Item -ItemType Directory -Path electron/dist -Force; Copy-Item -Path client/dist/* -Destination electron/dist -Recurse -Force\" && npm run dist -w electron",
+    "package": "npm run build -w client && powershell -Command \"if (Test-Path electron/dist) { Remove-Item -Recurse -Force electron/dist }; New-Item -ItemType Directory -Path electron/dist -Force; Copy-Item -Path client/dist/* -Destination electron/dist -Recurse -Force; Copy-Item -Path backend/server.js -Destination electron/server/server.js -Force\" && npm run dist -w electron",
     "install:all": "npm install && npm install -w client && npm install -w backend && npm install -w electron"
   },
   "keywords": [],
@@ -20,7 +20,6 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "concurrently": "^9.2.1",
-    "electron": "^1.0.0"
+    "concurrently": "^9.2.1"
   }
 }

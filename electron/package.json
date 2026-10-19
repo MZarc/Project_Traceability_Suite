@@ -1,6 +1,6 @@
 {
   "name": "project-traceability-suite",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Professional industrial project traceability and dashboard suite for real-time production monitoring.",
   "main": "main.js",
   "scripts": {

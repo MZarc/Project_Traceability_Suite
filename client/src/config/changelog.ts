@@ -9,6 +9,32 @@ export interface ChangelogEntry {
 
 export const CHANGELOG_DATA: ChangelogEntry[] = [
   {
+    version: '1.4.0',
+    date: '2026-10-19',
+    type: 'minor',
+    summary: 'Project Traceability Suite 1.4 - Stability, Rendering & Packaging Hardening',
+    highlights: [
+      'Fixed an infinite re-render loop in the project status-sync engine that could freeze the dashboard.',
+      'Fixed a React crash (Rules of Hooks violation) in Project Analytics when switching between projects.',
+      'Session snoozes now persist correctly for the duration of an app session.',
+      'To-Do reminders now fire against the user\'s local date and time instead of UTC.',
+      'Failed project saves now show a clear "Save Failed" dialog instead of failing silently.',
+      'Overdue detection now recognises the current Dispatch stage keys, not just legacy ones.',
+      'Stage notes entered in the grid now appear inside the Project Analytics breakdown.',
+      'Packaged Windows build now ships the same 11-stage server as development, with automated daily backups.'
+    ],
+    technical: [
+      'Restored missing react/react-dom runtime dependencies to the client workspace.',
+      'Split the status-sync effect and added a bail-out that preserves the previous array reference to prevent update loops.',
+      'Moved ProjectAnalyticsModal useMemo hooks above the early return and hardened null handling.',
+      'Unified due-alert snooze persistence on sessionStorage; removed the localStorage/sessionStorage mismatch.',
+      'Made persisted settings (snooze window, default zoom) NaN-safe on read.',
+      'Replaced toISOString()-based reminder comparison with local getFullYear/getMonth/getDate formatting.',
+      'Synced electron/server/server.js with backend/server.js and added the copy step to the root package script.',
+      'Removed an invalid electron devDependency and corrected the root package "main" entry.'
+    ]
+  },
+  {
     version: '1.3.0',
     date: '2026-07-28',
     type: 'major',

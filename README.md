@@ -1,103 +1,176 @@
 <div align="center">
-  <img src="client/public/favicon.png" width="128" height="128" alt="Project Traceability Suite Logo" />
-  <h1>Project Traceability Suite</h1>
-  <p><strong>Enterprise-grade desktop traceability suite engineered specifically for Electronics & PCBA Manufacturing companies — real-time Excel synchronization, stage aging analytics, and production line workflow monitoring.</strong></p>
 
-  <p>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/Domain-Electronics_%26_PCBA_Manufacturing-0052CC?style=for-the-badge&logo=microchip&logoColor=white" alt="Electronics & PCBA"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/Electron-30%2B-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js"></a>
-    <a href="#-tech-stack"><img src="https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge" alt="License"></a>
-  </p>
+<img src="client/public/favicon.png" width="120" height="120" alt="Project Traceability Suite" />
+
+# Project Traceability Suite
+
+### Real-time production traceability for **Electronics & PCBA manufacturing**
+
+Track every board from order sheet to dispatch — across an 11-stage shop-floor pipeline —
+with a local-first SQLite engine, Excel import/export, and a native Windows desktop shell.
+
+<br />
+
+<a href="#-overview"><img src="https://img.shields.io/badge/Version-1.4.0-2563EB?style=for-the-badge" alt="Version"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/Domain-Electronics_%26_PCBA_Manufacturing-0052CC?style=for-the-badge&logo=microchip&logoColor=white" alt="Electronics & PCBA"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/Platform-Windows_10%2F11-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/Electron-41-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/Express-5-339933?style=for-the-badge&logo=express&logoColor=white" alt="Express"></a>
+<a href="#-tech-stack"><img src="https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge" alt="MIT License"></a>
+
+<br />
+
+[Overview](#-overview) · [Features](#-key-features) · [Shop-Floor Pipeline](#-shop-floor-pipeline) · [Architecture](#-architecture) · [Tech Stack](#-tech-stack) · [Getting Started](#-getting-started) · [REST API](#-rest-api) · [Data & Backups](#-data--backups) · [Packaging](#-build--package)
+
 </div>
 
 ---
 
 ## 📌 Overview
 
-**Project Traceability Suite** is a high-performance Windows 11 desktop application engineered specifically for **Electronics & PCBA (Printed Circuit Board Assembly) Manufacturing** plants. 
+**Project Traceability Suite** is a high-performance **Windows desktop application** purpose-built for **Electronics & PCBA (Printed Circuit Board Assembly)** manufacturing floors.
 
-Unlike generic industrial ERPs, this suite is purpose-built to solve the specialized operational challenges of electronics manufacturing services (EMS) and OEM assembly lines—tracking multi-stage PCB batch lifecycles (SMT Assembly, AOI/AXI Inspection, THT Insertion, ICT/FCT Functional Testing, and Box-Build), identifying line bottlenecks, and seamlessly synchronizing daily Excel floor reports into a local-first SQLite analytics engine.
+Generic ERPs treat a build as a single status field. Real electronics manufacturing is a **multi-stage pipeline** — procurement, kitting, SMT, AOI, through-hole, QC, programming, testing, conformal coating, final goods and dispatch — where each station has its own start, due and completion dates, and where a single stalled stage silently delays the whole shipment.
 
----
+This suite was engineered around that reality:
 
-## 🔌 Tailored for Electronics & PCBA Production
-
-- 📟 **PCBA Stage-by-Stage Traceability**: Track job cards and batch numbers through SMT (Surface Mount Technology), Reflow Soldering, AOI/AXI, THT, ICT/FCT, Conformal Coating, and Final Quality Packaging.
-- 📊 **Real-Time Stage Aging Analytics**: Monitor active PCB batches in each assembly stage, auto-flag critical line bottlenecks (>14 days in any single process), and audit planned vs. actual target completion dates.
-- 📁 **High-Throughput Excel Synchronization**: Import, map, and export daily production logs and Excel work orders with high-performance async parsing powered by ExcelJS.
-- ⚡ **Local-First SQLite Engine**: Fast offline database queries, transactional integrity, and automatic background data persistence in `%AppData%` for shop-floor stability.
-- 🖥️ **Windows Desktop Native Integration**: Native frameless windowing, system tray minimizes, progress notifications, and background alert triggers for production managers.
-- 🎨 **Modern Fluent Light UI**: Engineered with dynamic glassmorphism, responsive grid resizers, stage progress timelines, and custom scrollbars tailored for factory monitors.
+- **Local-first.** A bundled Express + SQLite engine runs on the machine. No cloud, no internet dependency, no latency on the shop floor.
+- **Stage-aware.** Every project carries a full 11-stage timeline; the dashboard derives live status (Active / Completed / Overdue) from real stage dates.
+- **Excel-native.** Floor teams keep working in Excel — import and export work orders and daily logs without changing their habits.
+- **Desktop-native.** Frameless window, branded splash screen, system tray with live counters, native toast notifications and daily automated backups.
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## ✨ Key Features
+
+### 🏭 Production Traceability
+- **11-stage shop-floor pipeline** per project — procurement to dispatch, each with Status, Start, Due and Done tracking.
+- **Dispatch quantity control** — track shipped vs. remaining board quantities explicitly.
+- **Dynamic custom columns** — extend the grid with plant-specific fields without a schema migration.
+
+### 📊 Live Analytics & Monitoring
+- **Stage aging analysis** — days spent in each stage, flagging bottlenecks and overdue stages.
+- **Live statistics dashboard** — active, completed and overdue counts, plus upcoming/past-due alerts.
+- **Per-project analytics modal** — a full timeline breakdown of where a build's time actually went.
+
+### 🗂️ Business Data
+- **Customer database** — full contact records (multi-contact name, phone, email, designation), searchable and paginated.
+- **To-Do engine** — dated tasks with a red alert counter, in-app reminders and native notifications.
+- **Due-date alert system** — surfaces at-risk projects with configurable snooze windows.
+
+### 📁 Excel Synchronization
+- **High-throughput import** — parse and map production Excel workbooks into the database (ExcelJS streaming under the hood).
+- **Rich export** — generate styled, print-ready work orders and status sheets.
+- **Automated daily backup** — a nightly job writes the entire database to a formatted Excel backup file.
+
+### 🖥️ Desktop Experience
+- **Frameless native shell** with a branded splash screen.
+- **System tray** with live pending / completed / overdue counters at a glance.
+- **Native toast notifications** for due alerts and reminders.
+- **Session-scoped zoom** — temporary zoom that doesn't clobber your saved default.
+- **Single-instance lock** — reopening focuses the existing window instead of spawning a duplicate.
+
+---
+
+## 🔄 Shop-Floor Pipeline
+
+Every project flows through the same eleven stages. Each stage tracks **Status**, **Start date**, **Due date** and **Done date**; the final stage additionally tracks **Shipped Qty** and **Remaining Qty**.
 
 ```text
- ┌─────────────────────────────────────────────────────────────────────────┐
- │                      DESKTOP SHELL (Electron Main)                      │
- │  ┌─────────────────────────┐          ┌──────────────────────────────┐  │
- │  │ Electron 30+ Process    │ ───────► │ System Tray & IPC Bridge     │  │
- │  └────────────┬────────────┘          └──────────────────────────────┘  │
- └───────────────┼─────────────────────────────────────────────────────────┘
-                 │ (Secure Preload IPC Bridge)
-                 ▼
- ┌────────────────────────────────────────────────────────────────────────┐
- │                      USER INTERFACE (React Client)                     │
- │  ┌─────────────────────────┐   ┌──────────────────┐   ┌─────────────┐  │
- │  │ React 18 + TypeScript   │   │ Tailwind CSS v4  │   │ TanStack    │  │
- │  │ (Vite Build Pipeline)   │   │ + Lucide Icons   │   │ Table Grid  │  │
- │  └────────────┬────────────┘   └──────────────────┘   └─────────────┘  │
- └───────────────┼────────────────────────────────────────────────────────┘
-                 │ (Local Express HTTP REST API)
-                 ▼
- ┌─────────────────────────────────────────────────────────────────────────┐
- │                      BACKEND API & DATABASE ENGINE                      │
- │  ┌─────────────────────────┐          ┌──────────────────────────────┐  │
- │  │ Node.js + Express API   │ ───────► │ ExcelJS Synchronization      │  │
- │  └────────────┬────────────┘          └──────────────────────────────┘  │
- │               │                                                         │
- │               ▼                                                         │
- │  ┌──────────────────────────────────────────────────────────────────┐   │
- │  │ better-sqlite3 Engine ──► Local SQLite Database (%AppData%)      │   │
- │  └──────────────────────────────────────────────────────────────────┘   │
- └─────────────────────────────────────────────────────────────────────────┘
+  ┌───────────────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+  │ Procurement /     │ → │ Kitting  │ → │   SMT    │ → │   AOI    │
+  │ Order Sheet       │   └──────────┘   └──────────┘   └──────────┘
+  └───────────────────┘                                        │
+                                                               ▼
+  ┌──────────┐   ┌──────────┐   ┌──────────────┐   ┌──────────┐
+  │    TH    │ → │    QC    │ → │ Programming  │ → │ Testing  │
+  └──────────┘   └──────────┘   └──────────────┘   └──────────┘
+       ▲
+       │
+  ┌──────────┐   ┌──────────┐   ┌──────────────────────────────┐
+  │ Coating  │ → │    FG    │ → │ Dispatch                     │
+  └──────────┘   └──────────┘   │ (Shipped Qty / Remaining Qty) │
+                                └──────────────────────────────┘
 ```
+
+> Status is **derived automatically** from stage dates — never stored stale. A project that passes its dispatch due date before completion is flagged **Overdue** in real time.
+
+---
+
+## 🛠️ Architecture
+
+A three-tier local stack: a native desktop shell, a React renderer, and a bundled REST + SQLite engine — all communicating over localhost.
+
+```text
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │                        DESKTOP SHELL  (Electron Main)                    │
+ │   Frameless window · Splash screen · System tray · Single-instance lock  │
+ │   Background alert scheduler · Native notifications · IPC bridge         │
+ └───────────────────────────────────┬──────────────────────────────────────┘
+                                     │  Secure preload IPC (contextBridge)
+                                     ▼
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │                        RENDERER  (React 19 + TypeScript)                 │
+ │   Vite build · Tailwind CSS v4 · TanStack Table · Framer Motion          │
+ │   Traceability grid · Analytics · Customers · To-Do · Changelog          │
+ └───────────────────────────────────┬──────────────────────────────────────┘
+                                     │  axios HTTP  →  http://localhost:5000
+                                     ▼
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │                        BACKEND  (Node.js + Express 5)                    │
+ │   REST API · ExcelJS import/export · node-cron daily backup              │
+ │                              │                                           │
+ │                              ▼                                           │
+ │   better-sqlite3  ──►  Local SQLite database  (%AppData% / backend dir)  │
+ └──────────────────────────────────────────────────────────────────────────┘
+```
+
+The Electron main process **spawns the backend as a child process** and passes it a persistent `--base-dir`, so the database and backups always live next to the installed app data rather than inside the read-only bundle.
+
+---
+
+## 🧰 Tech Stack
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Desktop Shell** | Electron 30+, Preload IPC, Windows Native Shell Controls |
-| **Frontend UI** | React 18, TypeScript, Vite, TanStack Table v8, Tailwind CSS v4, Lucide Icons |
-| **Backend Engine** | Node.js, Express, `better-sqlite3`, ExcelJS |
-| **Storage** | SQLite 3 (stored locally in `%AppData%` under desktop profile) |
+| **Desktop Shell** | Electron 41, preload `contextBridge`, system tray, Windows toasts, `electron-builder` (NSIS) |
+| **Frontend** | React 19, TypeScript 6, Vite 5, Tailwind CSS v4, TanStack Table v8, Framer Motion, Lucide Icons |
+| **Backend** | Node.js, Express 5, `better-sqlite3` 12, ExcelJS, node-cron, xlsx |
+| **Storage** | SQLite 3 — persisted locally, left untouched on uninstall |
+| **Packaging** | electron-builder → standalone Windows NSIS installer |
 
 ---
 
 ## 📁 Repository Structure
 
 ```plaintext
-project_traceability_system/
-├── backend/                  # Express REST API & SQLite database engine
-│   ├── package.json          # Backend dependencies (express, better-sqlite3, exceljs)
-│   └── server.js             # API routes & database controller
-├── client/                   # Modern React 18 frontend dashboard
-│   ├── public/               # Static assets & favicon icons
-│   ├── src/                  # React components, stage aging tools & stores
-│   ├── package.json          # Frontend dependencies (React, Vite, TanStack)
-│   └── vite.config.ts        # Vite build configuration
-├── electron/                 # Electron main process & desktop wrapper
-│   ├── icon.ico / icon.png   # Application branded icons
-│   ├── main.js               # Main desktop window lifecycle & IPC registration
-│   ├── preload.js            # Secure IPC renderer bridge
-│   └── package.json          # Electron builder & packaging settings
-├── package.json              # Root monorepo workspace & orchestration scripts
-├── .gitignore                # Production root ignore rules
-├── LICENSE                   # MIT License
-└── README.md                 # Project documentation
+Project_Traceability_Suite/
+├── backend/                     # Express REST API & SQLite engine
+│   ├── package.json
+│   └── server.js                # Routes, schema, stage structure, daily backup
+├── client/                      # React 19 + Vite frontend
+│   ├── public/                  # Favicon & static icons
+│   ├── src/
+│   │   ├── App.tsx              # Main traceability grid, state & alert engine
+│   │   ├── components/          # Analytics, Customer, ChangeLog, Dropdown modals
+│   │   ├── config/changelog.ts  # In-app release history
+│   │   └── assets/              # Fonts, images, brand assets
+│   ├── index.html
+│   └── vite.config.ts
+├── electron/                    # Desktop shell & packaging
+│   ├── main.js                  # Window, tray, splash, backend spawn, IPC
+│   ├── preload.js               # Secure renderer bridge
+│   ├── splash.html              # Branded splash screen
+│   ├── server/                  # Server copy bundled into the installer
+│   ├── icon.ico / icon.png      # Application icons
+│   └── package.json             # electron-builder configuration
+├── package.json                 # Root workspace orchestration scripts
+└── README.md
 ```
 
 ---
@@ -106,60 +179,143 @@ project_traceability_system/
 
 ### Prerequisites
 
-- **Node.js**: `v18.0.0` or higher
-- **npm**: `v9.0.0` or higher
-- **OS**: Windows 10/11 (for desktop installer packaging)
+| Requirement | Version |
+| :--- | :--- |
+| **Node.js** | `20.x` or higher (built & tested on `24.x`) |
+| **npm** | `9.x` or higher |
+| **OS** | Windows 10 / 11 (desktop shell & installer packaging) |
 
-### Installation
+> Native SQLite bindings are built via `node-gyp`. On Windows install the **"Desktop development with C++"** workload if a from-source build is ever required — most machines pull a prebuilt binary automatically.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/MZarc/Project_Traceability_Suite.git
-   cd Project_Traceability_Suite
-   ```
+### 1. Clone
 
-2. **Install all workspace dependencies**:
-   ```bash
-   npm run install:all
-   ```
+```bash
+git clone https://github.com/MZarc/Project_Traceability_Suite.git
+cd Project_Traceability_Suite
+```
 
-3. **Rebuild native SQLite bindings (if prompted)**:
-   ```bash
-   npm run rebuild
-   ```
+### 2. Install all workspaces
 
----
+```bash
+npm run install:all
+```
 
-## 💻 Development & Packaging
+### 3. (If needed) rebuild the SQLite binding
 
-### Run in Development Mode
-Launches the Client (Vite server), Backend (Express API), and Electron Desktop Shell concurrently:
+```bash
+npm run rebuild
+```
+
+### 4. Launch in development
+
 ```bash
 npm run dev
 ```
 
-### Build & Package Executable Installer
-Compiles the client web build, synchronizes assets to Electron, and generates a standalone Windows Setup installer in `electron/dist/`:
+This starts **all three** processes concurrently — the Vite dev server, the Express API on port `5000`, and the Electron desktop shell.
+
+---
+
+## 📜 Workspace Commands
+
+| Command | Description |
+| :--- | :--- |
+| `npm run dev` | Run client (Vite), backend (Express) and Electron concurrently |
+| `npm run build` | Production build of the React client |
+| `npm run package` | Build client, sync assets, and produce the Windows installer |
+| `npm run install:all` | Install dependencies across root, client, backend and electron |
+| `npm run rebuild` | Rebuild the `better-sqlite3` native binary for the local environment |
+
+---
+
+## 🔌 REST API
+
+The backend exposes a local REST API on **`http://localhost:5000`**.
+
+| Method | Endpoint | Purpose |
+| :--- | :--- | :--- |
+| `GET` | `/api/projects` | List all traceability projects |
+| `POST` | `/api/projects` | Create a project |
+| `PUT` | `/api/projects/:id` | Update a project |
+| `DELETE` | `/api/projects/:id` | Delete a project |
+| `DELETE` | `/api/projects-clear` | Clear **all** projects |
+| `GET` | `/api/customers` | List customers |
+| `POST` | `/api/customers` | Create a customer |
+| `PUT` | `/api/customers/:id` | Update a customer |
+| `DELETE` | `/api/customers/:id` | Delete a customer |
+| `GET` | `/api/todos` | List to-do items |
+| `POST` | `/api/todos` | Create a to-do |
+| `PUT` | `/api/todos/:id` | Update a to-do |
+| `DELETE` | `/api/todos/:id` | Delete a to-do |
+| `GET` | `/api/columns` | List dynamic grid columns |
+| `POST` | `/api/columns` | Add a dynamic grid column |
+| `POST` | `/api/import-excel` | Bulk-import a production Excel workbook |
+
+---
+
+## 💾 Data & Backups
+
+- **Storage engine:** SQLite 3 via `better-sqlite3` (synchronous, transactional, fast).
+- **Location:** the backend accepts a `--base-dir` argument; packaged builds point it at the app's user-data directory so a read-only install still has a writable database.
+- **Automated backup:** a `node-cron` job runs **every day at midnight** (`0 0 * * *`) and writes the full dataset to a styled Excel workbook inside `backups/`.
+- **Uninstall-safe:** `deleteAppDataOnUninstall` is disabled — your data survives reinstalls.
+
+---
+
+## 📦 Build & Package
+
+Produce a distributable Windows installer:
+
 ```bash
 npm run package
 ```
 
+This will:
+
+1. Build the React client (`tsc && vite build`)
+2. Copy the web build into `electron/dist/`
+3. Sync `backend/server.js` into `electron/server/`
+4. Rebuild native modules for Electron's ABI and run `electron-builder`
+
+Output:
+
+```text
+dist-exe/v1.4.0/Project Traceability Suite-Setup.exe
+```
+
+An NSIS installer (per-user, changeable install directory) with a patched application icon. Blueprints for macOS/Linux targets can be added in `electron/package.json`.
+
 ---
 
-## 📋 Workspace Commands Summary
+## 🗺️ Roadmap
 
-| Command | Action |
-| :--- | :--- |
-| `npm run dev` | Runs client, backend server, and Electron app concurrently in dev mode |
-| `npm run build` | Builds the client React application for production |
-| `npm run package` | Builds client assets and packages the standalone Windows Electron executable |
-| `npm run install:all` | Installs dependencies across root, client, backend, and electron workspaces |
-| `npm run rebuild` | Rebuilds `better-sqlite3` native binaries for local environment |
+- [ ] In-app screenshot gallery & onboarding tour
+- [ ] Role-based access (operator / supervisor / admin)
+- [ ] Scheduled email + Excel report delivery
+- [ ] Multi-line / multi-plant database partitioning
+- [ ] Code-splitting to shrink the initial renderer bundle
 
 ---
 
-## 🤝 Contributing & License
+## 🤝 Contributing
 
-Developed and maintained by **Meet Mistry** ([MZarc](https://github.com/MZarc)).
+Contributions, issues and feature requests are welcome — open an [issue](https://github.com/MZarc/Project_Traceability_Suite/issues) or submit a pull request.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+Built and maintained by **Meet Mistry** ([@MZarc](https://github.com/MZarc)).
+
+---
+
+## 📄 License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+
+<div align="center">
+<br />
+<sub>Engineered for the shop floor · Electronics & PCBA Manufacturing · v1.4.0</sub>
+</div>
